@@ -1,0 +1,12 @@
+---
+name: Data.FormValidator
+version: 0.02
+author:
+  - Joshua I. Miller <unrtst@cpan.org>
+abstract: Validate HTML form input based on input profiles.
+license: perl
+resources:
+  license: http://dev.perl.org/licenses/
+build_requires:
+  Test.Simple: 0.10
+provides: {}

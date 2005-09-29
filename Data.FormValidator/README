@@ -1,0 +1,647 @@
+NAME
+    Data.FormValidator - Validate HTML form input based on input profile.
+
+SYNOPSIS
+     <FORM onSubmit="return myValidate(this);">
+     ...
+     </FORM>
+     <SCRIPT LANGUAGE="javascript"><!--
+     var click_once = 0;
+     function myValidate (frmObj) {
+        var goodColor = "#FFFFFF";
+        var badColor  = "#FFFF99";
+
+        var profile = new Object;
+        // define profile ...
+
+        // put any extras you'd like in here
+        if (click_once == 0) {
+            click_once = 1;
+            var passed = Data.FormValidator.check_and_report(frmObj, profile, goodColor, badColor);
+            if (passed) {
+                return true;
+            } else {
+                // reset click_once, so they can re-fillout the form
+                click_once = 0;
+                return false;
+            }
+        }
+     }
+     // --></SCRIPT>
+
+    ALTERNATIVELY: the following is a more detailed handling, and is
+    actually what happens in when the above convenience method,
+    "check_and_report()", is called.
+
+     <FORM onSubmit="return myValidate(this);">
+     ...
+     </FORM>
+     <SCRIPT LANGUAGE="javascript"><!--
+     function myValidate (frmObj) {
+        var goodColor = "#FFFFFF";
+        var badColor  = "#FFFF99";
+
+        var profile = new Object;
+        // define profile ...
+        var results = Data.FormValidator.check(frmObj, profile);
+        // clean up colors from form
+        results.cleanForm(frmObj, goodColor);
+        if (! results.success()) {
+            var error_text = "";
+            var msgs = results.msgs();
+            for (field in results.missing_required) {
+                results.changeStyle(frmObj, field, badColor);
+                error_text += "Field ["+field+"] is required.\n";
+            }
+            for (field in results.missing_dependency) {
+                for (i in results.missing_dependency[field]) {
+                    var dep = results.missing_dependency[field][i];
+                    results.changeStyle(frmObj, dep, badColor);
+                    error_text += "Marking field ["+field+"] requires field ["+dep+"] also be filled in.\n";
+                }
+            }
+            for (group in results.missing_depgroup) {
+                var completed  = results.missing_depgroup[group]['completed'];
+                var incomplete = results.missing_depgroup[group]['incomplete'];
+                for (i in incomplete) {
+                    results.changeStyle(frmObj, incomplete[i], badColor);
+                }
+                error_text += "Marking field(s) ["+completed.join(', ')+"] requires field(s) ["+incomplete.join(', ')+"] also be filled in.\n";
+            }
+            for (field in results.invalid) {
+                results.changeStyle(frmObj, field, badColor);
+                error_text += (msgs[field]) ? "Field ["+field+"] : "+msgs[field] :
+                                              "Improperly formatted data in field ["+field+"].";
+                error_text += "\n";
+            }
+
+            alert("There is a problem with your form.\n\n"+error_text);
+            return false;
+
+        } else {
+            // do something with results.valid ?
+            return true;
+        } 
+     };
+     // --></SCRIPT>
+
+DESCRIPTION
+    Data.FormValidator's aim is to bring all the benefits of the perl module
+    Data::FormValidator over to javascript, using the same input profiles
+    (they can be dumped into javascript objects using the perl module
+    Data::JavaScript).
+
+    Data.FormValidator lets you define profiles which declare the required
+    and optional fields and any constraints they might have.
+
+    The results are provided as an object which makes it easy to handle
+    missing and invalid results, return error messages about which
+    constraints failed, or process the resulting valid data.
+
+TODO
+    There are many features missing from this library, that are available in
+    the perl version. The big ones have been marked in the code with the
+    text "TODO". There are too many things missing to explain them all at
+    this time, but we've attempted to note below when feature are not
+    available, work differently, or only exist here.
+
+VALIDATING INPUT
+  new Data.FormValidator()
+    Constructor. Currently takes NO options. (TODO: this should optionally
+    support taking in defaults).
+
+    Returns a Data.FormValidator object (referred to from here on out as
+    "dfv").
+
+  dfv.validate(formObject, profile);
+    ***DEPRECATED***
+
+    "validate()" provides a deprecated alternative to "check()". It has the
+    same input syntax, but returns a four element array, containing the
+    following elements from the "Results" object (the return value of the
+    "check()" method).
+
+        results.valid()
+        results.missing()
+        results.validate_invalid()
+        results.unknown()
+
+    See Data::FormValidator, and the following documentation on
+    "Data.FormValidator.Results" for more info.
+
+  dfv.check()
+     var results = Data.FormValidator.check(formObject, dfv_profile);
+
+    "check" is the recommended method to use to validate forms. It returns
+    it's results as a Data.FormValidator.Results object. A deprecated method
+    "validate" is also available, returning it's results as an array
+    described above.
+
+     var results = Data.FormValidator.check(formObject, dfv_profile);
+
+    Here, "check()" is used as a class method***, and takes two required
+    parameters. It can also be called as an instance method:
+
+     var dfv = new Data.FormValidator();
+     var results = dfv.check(formObject, dfv_profile);
+
+    The first argument is a javascript DOM object pointing to the form to be
+    validated.
+
+    The second argument is a reference to the profile you are validating.
+
+    The resulting "results" object can be used to call has_missing(),
+    has_invalid(), and their ilk.
+
+    *** NOTE: "class method" is what it's called on the perl side. Here,
+    it's an object constructor, which just happens to take care of some
+    stuff in the Data.FormValidator namespace behind the scenes for you.
+
+  Data.FormValidator.check_and_report(formObject, dfv_profile [, goodColor, badColor] )
+     var success = Data.FormValidator.check_and_report(formObject, dfv_profile);
+
+    This is a convenience method. It takes care of calling "check()",
+    processing the results, building a helpful error message if it erred
+    out, and reporting the errors to the user (via javascript alert() box).
+    If "check()" succeeds, it returns "true"; returns "false" on failure.
+
+    This is the recommended way to use this library. If you require more
+    advanced usage, this method can be used as a good starting point to base
+    your processing upon.
+
+    Options:
+
+    formObject:
+        javascript DOM object pointing to the form to be validated.
+
+    dfv_profile:
+        Reference to the profile you are validating.
+
+    goodColor (optional):
+        Hex value of a color to set the form field backgrounds to if the
+        field is valid.
+
+    badColor (optional):
+        Hex value of a color to set the form field backgrounds to if the
+        field is invalid.
+
+  dfv.load_profiles() (TODO)
+  dfv._mergeProfiles() (TODO)
+  dfv._check_profile_syntax() (TODO)
+INPUT PROFILE SPECIFICATION
+    Please see the pod documentation for the perl module
+    Data::FormValidator.
+
+    NOTE: This library currently only supports regular expression
+    constraints, and only those specified as strings ("/regexp/", not
+    qr/regexp/).
+
+    The profile spec for this library, is the result of running a perl
+    "Data::FormValidator" profile through the module Data::JavaScript. You
+    may construct it by hand, but the specifics of such are outside the
+    scope of this document. Please read on for some more info.
+
+    Data::JavaScript dumps perl data structures out to a javascript
+    object/array structure.
+
+    Here is a very simple input profile in perl:
+
+        my $profile = {
+            optional => [qw( company fax country )],
+            required => [qw( fullname age phone email address )],
+            constraints => {
+                email => { name => "valid_email",
+                           constraint => "/^(([a-z0-9_\\.\\+\\-\\=\\?\\^\\#]){1,64}\\@(([a-z0-9\\-]){1,251}\\.){1,252}[a-z0-9]{2,4})$/i" },
+                age => { name => "valid_age",
+                         constraint => "/^1?\d?\d$/" },
+            },
+            msgs => {
+                constraints => {
+                    valid_email => "Invalid e-mail address format",
+                    valid_age   => "Age entered must be between 0 and 199",
+                }
+            },
+        };
+
+    Here is the same profile output by "Data::JavaScript::jsdump()":
+
+        var profile = new Object;
+        profile.constraints = new Object;
+        profile.constraints.email = new Object;
+        profile.constraints.email.name = 'valid_email';
+        profile.constraints.email.constraint = '\/\^\(\(\[a\-z0\-9_\\\.\\\+\\\-\\\=\\\?\\\^\\\#\]\)\{1\,64\}\\\@\(\(\[a\-z0\-9\\\-\]\)\{1\,251\}\\\.\)\{1\,252\}\[a\-z0\-9\]\{2\,4\}\)\012i';
+        profile.constraints.age = new Object;
+        profile.constraints.age.name = 'valid_email';
+        profile.constraints.age.constraint = '\/\^1\?\\d\?\\d\012';
+        profile.required = new Array;
+        profile.required[0] = 'fullname';
+        profile.required[1] = 'phone';
+        profile.required[2] = 'email';
+        profile.required[3] = 'address';
+        profile.optional = new Array;
+        profile.optional[0] = 'company';
+        profile.optional[1] = 'fax';
+        profile.optional[2] = 'country';
+        profile.msgs = new Object;
+        profile.msgs.constraints = new Object;
+        profile.msgs.constraints.valid_email = 'Invalid e\-mail address format';
+        profile.msgs.constraints.valid_age = 'Age entered must be between 0 and 199';
+
+    Your profile may contain anything that the perl module
+    Data::FormValidator contains, but only a subset of it will be supported
+    by this library. The following keys are supported.
+
+    required
+        Array of required fields (required means they must not be blank, nor
+        consist only of spaces). Valid fields listed here will be returned
+        in the results.valid object.
+
+    optional
+        Array of optional fields (if filled in, constraints placed on these
+        fields will also be checked). Valid fields listed here will be
+        returned in the results.valid object, as well as blank ones.
+
+    dependencies
+         dependencies   => {
+            # If cc_no is entered, make cc_type and cc_exp required
+            "cc_no" => [ qw( cc_type cc_exp ) ],
+         },
+
+        This is for the case where an optional field has other requirements.
+        The dependent fields can be specified with an array.
+
+    dependency_groups
+         dependency_groups  => {
+             # if either field is filled in, they all become required
+             password_group => [qw/password password_confirmation/],
+         }
+
+        The key is an arbitrary name you create. The values are arrays of
+        field names in each group. If any field in the group is filled in,
+        all fields in the group must be filled in.
+
+    constraints
+         constraints => {
+            fieldName1  => '/regexp/i',
+            fieldName2  => { name => 'all_numbers', constraint => '/^\d+$/' },
+            fieldName3  => [ { name => 'no_spaces', constraint => '/^\S*$/' },
+                             { name => 'word_chars', constraint => '/^\w+$/' } ],
+         }
+
+        The second and third form above are recommended, as they allow you
+        to tie the constraint to a custom error message (through the msgs
+        hash).
+
+        We support a very narrow range of constraints options (we do not
+        support constraint_methods as of yet, nor named constraints, nor
+        subroutine references, nor compiled regexps(qr/regexp/) ). The ones
+        listed above will all work.
+
+    msgs
+        This key is used to define parameters related to formatting error
+        messages returned to the user.
+
+        Please see Data::FormValidator for more detailed information.
+
+        The important thing to note is that
+
+        A) the constraint must be named. Eg:
+
+            profile => {
+                constraints => {
+                    fieldName   => { name => 'someName', constraint => '/\d+/' },
+                },
+            };
+
+        B) the msgs hash references the "name =>", not the field name. Eg:
+
+            profile => {
+                msgs    => {
+                    constraints => {
+                        someName    => "Error message goes here",
+                    },
+                },
+            };
+
+        The rest is important too, but easy to grasp from the
+        Data::FormValidator documentation.
+
+NAME
+    Data.FormValidator.Results - results of form input validation.
+
+SYNOPSIS
+        var results = Data.FormValidator.check(formObject, dfv_profile);
+
+        var msgs = results.msgs();
+
+        // Print the name of missing fields
+        if ( results.has_missing ) {
+            for (f in results.missing) {
+                alert(f + " is missing\n");
+            }
+        }
+
+        // Print the name of invalid fields
+        if ( results.has_invalid ) {
+            for (f in results.invalid) {
+                alert(f + " is invalid: " + msgs[f] + "\n");
+            }
+        } 
+
+        // Print unknown fields
+        if ( results.has_unknown ) {
+            for (f in results.unknown) {
+                alert(f + " is unknown\n");
+            }
+        } 
+
+        // Print valid fields
+        for (f in results.valid) {
+            alert(f + " = " + results.valid[f] + "\n");
+        }
+
+DESCRIPTION
+    This object is returned by the Data.FormValidator "check" method. It can
+    be queried for information about the validation results.
+
+RESULTS METHODS
+  results.success()
+    This method returns true if there were no invalid or missing fields,
+    else it returns false.
+
+  results.has_missing()
+    Returns a count of missing fields (zero for none).
+
+  results.has_invalid()
+    Returns a count of invalid fields (zero for none).
+
+  results.has_unknown()
+    Returns a count of unknown fields (zero for none).
+
+  results.has_missing_required()
+    Returns a count of required fields that were missing (zero for none).
+
+  results.has_missing_dependency()
+    Returns a count of dependency fields that were missing (zero for none).
+
+  results.has_missing_depgroup()
+    Returns a count of dependency group fields that were missing (zero for
+    none).
+
+DATA ACCESSOR STRUCTURES
+  results.valid
+    Object data structure.
+
+    Access Single element:
+
+        results.valid.element
+        results.valid['element']
+
+    Iterate over all valid items:
+
+        for (field in results.valid) {
+            // do something with "field"
+        }
+
+  results.invalid
+    Object data structure.
+
+    Access Single element:
+
+        results.invalid.element
+        results.invalid['element']
+
+    Iterate over all valid items:
+
+        for (field in results.valid) {
+            for (i in results.valid[field]) {
+                var testName = results.valid[field][i];
+            }
+            // do something with "field"
+        }
+
+  results.validate_invalid
+    Array data structure.
+
+    Array of Arrays.
+
+    First element of each row is the "fieldName". The remainder of the
+    elements are the test names that failed. Eg.
+
+        for (i in results.validate_invalid) {
+            var fieldName = results.validate_invalid[i];
+            var failedTests = new Array;
+            for (var j=1; j<results.validate_invalid.length; j++) {
+                failedTests[failedTests.length] = results.validate_invalid[j];
+            }
+        }
+
+  results.missing
+    Object data structure. Contains all missing fields (those listed in
+    "required" but not filled in, those listed as a dependency to an
+    optional field that was filled in, those blank from a dependency group
+    that had one or more members filled in). There are more specific
+    missing_* objects you can use to get at each category of missing
+    individually (NOTE: the more specific ones are NOT available in the perl
+    version of Data::FormValidator).
+
+    Access Single element:
+
+        results.missing.element
+        results.missing['element']
+
+    Iterate over all items:
+
+        for (field in results.missing) {
+            // do something with "field"
+        }
+
+  results.missing_required
+    Object data structure. (NOTE: this property is not available in the perl
+    version of Data::FormValidator)
+
+    Access Single element:
+
+        results.missing_required.element
+        results.missing_required['element']
+
+    Iterate over all items:
+
+        for (field in results.missing_required) {
+            // do something with "field"
+        }
+
+  results.missing_dependency
+    Object data structure. (NOTE: this property is not available in the perl
+    version of Data::FormValidator)
+
+    This data structure is a bit more complex. The first level contains the
+    "fieldName" which triggered the dependency. As its value, is an array of
+    dependencies that were not completed. Eg.
+
+        for (fieldName in this.missing_dependency) {
+            // fieldName triggered this dependency
+            alert("field["+fieldName+"] required the following fields also be completed: "+ this.missing_dependency[fieldName].join(", ") );
+        }
+
+  results.missing_depgroup
+    Object data structure. (NOTE: this property is not available in the perl
+    version of Data::FormValidator)
+
+    This data structure is a bit more complex. The first level contains the
+    "dependency group name" that failed the test. It is an object which has
+    two properties: "completed" and "incomplete". Each of those properties
+    holds and array of completed and incomplete fields respectively.
+
+    Ex.
+
+        for (group in results.missing_depgroup) {
+            var completed  = results.missing_depgroup[group]['completed'];
+            var incomplete = results.missing_depgroup[group]['incomplete'];
+            for (i in incomplete) {
+                results.changeStyle(frmObj, incomplete[i], badColor);
+            }
+            error_text += "Marking field(s) ["+completed.join(', ')+"] requires field(s) ["+incomplete.join(', ')+"] also be filled in.\n";
+        }
+
+  results.unknown
+    Object data structure. List of all fields found in the form that are not
+    listed as required nor optional in the dfv_profile.
+
+    Access Single element:
+
+        results.unknown.element
+        results.unknown['element']
+
+    Iterate over all items:
+
+        for (field in results.unknown) {
+            // do something with "field"
+        }
+
+UTILITY METHODS
+  results.msgs()
+    This method returns an object data structure of error messages. The
+    exact format is determined by parameters in the "msgs" area of the
+    validation profile, described in the Data::FormValidator documentation.
+
+    This method does NOT yet support the optional "controls" parameter.
+
+    The data structure returned can be accesses like so:
+
+        var msgs = results.msgs();
+        for (field in results.invalid) {
+            error_text += msgs[field] + "\n";
+        }
+
+    NOTE: the messages for missing data sets are very bland. You'd be better
+    off producing your own on the fly in those cases. But, this is quite
+    helpful with invalid data :-)
+
+  results.changeStyle(formObject, fieldName, rgbColor)
+    This will change the background color of all form elements by the given
+    name in the given form, to the given color (defaults to #FFFF99).
+
+    This is an especially handy method, as you don't have to worry about how
+    many times the form field "password" shows up on the page, nor even what
+    type of field it is (ex. changing the background of a select list is
+    different from a text field), and you can even have mixed types of
+    fields with the same name.
+
+    TODO: create similar method to change the CSS class of the element.
+
+    NOTE / TODO: This method doesn't really belong in this namespace, but it
+    provides a substantial benefit, and the supporting code library is
+    already here, so it's likely to stick around for a while.
+
+  results.cleanForm(formObject, rgbColor)
+    Changes the background color of every element in the given form to the
+    given color (defaults to #FFFFFF).
+
+    Useful to call prior to processing all the invalid fields.
+
+    TODO: create similar method to change the CSS class of the element.
+
+    NOTE / TODO: This method doesn't really belong in this namespace, but it
+    provides a substantial benefit, and the supporting code library is
+    already here, so it's likely to stick around for a while.
+
+INTERNAL METHODS
+    The following methods are only noted here so you know of their
+    existence. They are used internally to the Data.FormValidator.Results
+    object. If you find them useful for other purposes, feel free to yank
+    them out and do as you wish (within the bound of the license agreement
+    of course).
+
+    getElementListByName(frmObj, elementName)
+        Takes the form object, and a form element name Returns an array of
+        elements, or false if it doesn't exist.
+
+    isArray(thisObject)
+        verify that something is an array
+
+    isValidObject(thisObject)
+        verify that an object exists and is valid
+
+    hasSelected(selectObj)
+        return array of selected item values, or false if nothing was
+        selected
+
+        NOTE: this method has some work around for the broken IE 5, 5.5, and
+        6. The work arounds currently make all platforms behave less than
+        perfect, as they currently do not include any browser detection.
+        TODO: add browser detection.
+
+    hasChecked(checkboxObj)
+        Dispatch off to hasRadioOrCheckbox
+
+    hasRadio(radioObj)
+        Dispatch off to hasRadioOrCheckbox
+
+    hasRadioOrCheckbox(thisObj)
+        return array of selected item values, or false if nothing was
+        selected
+
+    hasMCEText(mceObj)
+        return array of text values, with empty elements if the field(s) are
+        blank
+
+    hasText(textObj)
+        return array of text values, with empty elements if the field(s) are
+        blank
+
+    blankText(textObj)
+        step through a string, and see if it's nothing but blank
+
+    fieldType(Obj)
+        method to determine type of form field. We use this, cause we
+        support meta types like tinymce.
+
+        NOTE: MUST pass in a single form element, not some jacked up
+        frmObj['field'] thing.
+
+    emptyField(frmObj, fieldName)
+        dispatching function - sends check to appropriate typed check
+
+        returns true if the field is empty
+
+    getField(frmObj, fieldName)
+        dispatching function - snags the data for the requested field (all
+        instances of such named field). NOTE: this always returns an array
+
+SEE ALSO
+    Data::FormValidator, Data::FormValidator::Results,
+    Data::FormValidator::Constraints,
+    Data::FormValidator::ConstraintsFactory, Data::FormValidator::Filters
+
+AUTHOR
+    Joshua I. Miller <jmiller@purifieddata.net>
+
+COPYRIGHT
+    Copyright (c) 2005 by CallTech Communications, LLC.
+
+    Portions Copyright (c) 1999,2000 iNsu Innovations Inc.
+
+    This program is free software; you can redistribute it and/or modify it
+    under the terms as perl itself.
+
