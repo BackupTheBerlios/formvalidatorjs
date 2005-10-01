@@ -1,0 +1,192 @@
+<HTML><HEAD>
+<script language="javascript" type="text/javascript" src="FormValidator.js"></script>
+
+<script language="javascript"><!--
+// Profile. This was dumped from perl via Data::JavaScript from the following structure:
+/*
+    my $valid_profile = {
+        required    => [qw( password1
+                            tinymcetext
+                            text1
+                            select1
+                            select2
+                            select3
+                            checkbox1
+                            radio1
+                            file1
+                            submit1
+                       )],
+                            #textarea1
+                            #reset1
+                            #hidden1
+        optional    => [qw( textarea1 text2 )],
+        dependencies    => {
+            text1   => [ qw(textarea1 checkbox1) ],
+            },
+        dependency_groups => {
+            depend_group_1 => [qw(depend1 depend2 depend3)],
+            },
+        constraints => {
+            text1       => '/bob/i',
+            text2       => [{ name => 'text2',       constraint => '/sam/i' },
+                            { name => 'text2b',      constraint => '/mmy/i' }],
+            textarea1   => { name => 'textarea1',   constraint => '/bob/i' } ,
+            tinymcetext => { name => 'tinymcetext', constraint => '/george/i' } ,
+            select1     => '/test/i',
+            select2     => '/test/i',
+            select3     => '/test/i',
+            },
+        msgs    => {
+            format      => '%s',
+            invalid     => 'Invalid data',
+            invalid_separator   => ", ",
+            constraints => {
+                text2   => 'We are sorry, but the text2 field must contain the text \'sam\' somewhere within its message',
+                text2b  => 'We are sorry, but the text2 field must contain the text \'mmy\' somewhere within its message',
+                select2 => 'We are sorry, but the textarea must contain the text \'bob\' somewhere within its message',
+                textarea1   => 'We are sorry, but the textarea must contain the text \'bob\' somewhere within its message',
+                tinymcetext => 'We are sorry, but the tinymcetext must contain the text \'george\' somewhere within its message',
+                },
+            },
+        };
+*/
+var myProfile = new Object;
+myProfile.dependency_groups = new Object;
+myProfile.dependency_groups.depend_group_1 = new Array;
+myProfile.dependency_groups.depend_group_1[0] = 'depend1';
+myProfile.dependency_groups.depend_group_1[1] = 'depend2';
+myProfile.dependency_groups.depend_group_1[2] = 'depend3';
+myProfile.constraints = new Object;
+myProfile.constraints.select2 = '\/test\/i';
+myProfile.constraints.text2 = new Array;
+myProfile.constraints.text2[0] = new Object;
+myProfile.constraints.text2[0].name = 'text2';
+myProfile.constraints.text2[0].constraint = '\/sam\/i';
+myProfile.constraints.text2[1] = new Object;
+myProfile.constraints.text2[1].name = 'text2b';
+myProfile.constraints.text2[1].constraint = '\/mmy\/i';
+myProfile.constraints.select3 = '\/test\/i';
+myProfile.constraints.tinymcetext = new Object;
+myProfile.constraints.tinymcetext.name = 'tinymcetext';
+myProfile.constraints.tinymcetext.constraint = '\/george\/i';
+myProfile.constraints.select1 = '\/test\/i';
+myProfile.constraints.text1 = '\/bob\/i';
+myProfile.constraints.textarea1 = new Object;
+myProfile.constraints.textarea1.name = 'textarea1';
+myProfile.constraints.textarea1.constraint = '\/bob\/i';
+myProfile.required = new Array;
+myProfile.required[0] = 'password1';
+myProfile.required[1] = 'tinymcetext';
+myProfile.required[2] = 'text1';
+myProfile.required[3] = 'select1';
+myProfile.required[4] = 'select2';
+myProfile.required[5] = 'select3';
+myProfile.required[6] = 'checkbox1';
+myProfile.required[7] = 'radio1';
+myProfile.required[8] = 'file1';
+myProfile.required[9] = 'submit1';
+myProfile.dependencies = new Object;
+myProfile.dependencies.text1 = new Array;
+myProfile.dependencies.text1[0] = 'textarea1';
+myProfile.dependencies.text1[1] = 'checkbox1';
+myProfile.optional = new Array;
+myProfile.optional[0] = 'textarea1';
+myProfile.optional[1] = 'text2';
+myProfile.msgs = new Object;
+myProfile.msgs.constraints = new Object;
+myProfile.msgs.constraints.select2 = 'We are sorry\, but the textarea must contain the text \'bob\' somewhere within its message';
+myProfile.msgs.constraints.text2 = 'We are sorry\, but the text2 field must contain the text \'sam\' somewhere within its message';
+myProfile.msgs.constraints.tinymcetext = 'We are sorry\, but the tinymcetext must contain the text \'george\' somewhere within its message';
+myProfile.msgs.constraints.text2b = 'We are sorry\, but the text2 field must contain the text \'mmy\' somewhere within its message';
+myProfile.msgs.constraints.textarea1 = 'We are sorry\, but the textarea must contain the text \'bob\' somewhere within its message';
+myProfile.msgs.invalid_separator = '\, ';
+myProfile.msgs.format = '\%s';
+myProfile.msgs.invalid = 'Invalid data';
+// --></script>
+
+<script language="javascript"><!--
+ // This is our small wrapper around Data.FormValidator, which our onSubmit() will call.
+ var click_once = 0;
+ function valid_data (frmObj) {
+    var goodColor = "#FFFFFF";
+    var badColor  = "#FFFF99";
+
+    var profile = myProfile; // pulled from profile.js
+
+    // put any extras you'd like in here
+    if (click_once == 0) {
+        click_once = 1;
+        var passed = Data.FormValidator.check_and_report(frmObj, profile, goodColor, badColor);
+        if (passed) {
+            return true;
+        } else {
+            // reset click_once, so they can re-fillout the form
+            click_once = 0;
+            return false;
+        }
+    }
+ }
+
+// -->
+</script>
+
+    </HEAD><BODY>
+<B>This (ugly) form is an example of a few of the features of Data.FormValidator.js.<BR>
+Please note, FAR more customized validation is possible with this module.</B>
+<HR>
+
+<FORM onSubmit="return valid_data(this);">
+
+password<INPUT TYPE=password name=password1 value=""> (required)<BR>
+tinymce textarea<TEXTAREA name="tinymcetext" rows="3"></TEXTAREA>(required, must contain "george")<BR><!---  mce_editable="true" slap this in the text area to make it a tinymce editor (once loading the tinyMCE library that is) -->
+
+textarea<TEXTAREA name=textarea1></TEXTAREA>(optional, but required if "text1" is filled in)<BR>
+text 1<INPUT TYPE=text name=text1 value=""> (requird, must contain the text "bob")<BR>
+text 1<INPUT TYPE=text name=text1 value=""> (requird, must contain the text "bob")<BR>
+text 2<INPUT TYPE=text name=text2 value=""> (optional, but must contain both "sam" and "mmy" if it is filled in)<BR>
+hidden<INPUT TYPE=hidden name=hidden1 value=""><BR>
+
+select-one<SELECT name=select1>
+                 <OPTION>testA NO VALUE EXPLICITLY SET
+                 <OPTION value="test1">t e s t 1  asdfasdf
+                 <OPTION value="test2">t e s t 2  asdfasdf
+                 <OPTION value="balsdf">balsdf asdfasdf
+               </SELECT> (required, must contain "test")<BR>
+select-multiple<SELECT name=select2 multiple>
+                 <OPTION>testA NO VALUE EXPLICITLY SET
+                 <OPTION value="test1">test1 asdfasdf
+                 <OPTION value="test2">test2 asdfasdf
+                 <OPTION value="balsdf">balsdf asdfasdf
+               </SELECT> (required, must contain "test")<BR>
+
+select-one<SELECT name=select3>
+                 <OPTION value="">testA VALUE EXPLICITLY SET TO ""
+                 <OPTION value="">testB VALUE EXPLICITLY SET TO ""
+                 <OPTION>testC NO VALUE EXPLICITLY SET
+                 <OPTION value="test1">t e s t 1  asdfasdf
+                 <OPTION value="test2">t e s t 2  asdfasdf
+                 <OPTION value="balsdf">balsdf asdfasdf
+               </SELECT> (required, must contain "test")<BR>
+checkbox: asdf<INPUT TYPE=checkbox name=checkbox1 value="asfd">
+          qwer<INPUT TYPE=checkbox name=checkbox1 value="qwer">(required)<BR>
+
+radio: 1<INPUT TYPE=radio name=radio1 value="1">
+       2<INPUT TYPE=radio name=radio1 value="2">(required)<BR>
+dependency group: <INPUT TYPE=text name=depend1> 
+                  <INPUT TYPE=text name=depend2> 
+                  <SELECT name=depend3>
+                    <OPTION value="">testa value set to ""
+                    <OPTION value="">testb value set to ""
+                    <OPTION>testc no value set
+                    <OPTION value="test1">test 1
+                  </SELECT>(if any of these are filled in, they all must be filled in)<br>
+file: <INPUT TYPE=file name=file1>(required)<BR>
+
+reset: <INPUT TYPE=reset  name=reset1  value=reset><BR>
+submit: <INPUT TYPE=submit name=submit1 value=sub>(required)<BR>
+
+<INPUT TYPE=hidden name=frmTarget value="testing">
+
+</FORM>
+</BODY></HTML>
+

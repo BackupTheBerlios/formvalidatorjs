@@ -1,0 +1,247 @@
+<HTML>
+
+<HEAD>
+    <TITLE>Data.FormValidator - JavaScript Form Validation Baded on Data::FormValidator.pm</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BORDER="0" CELLPADDING="1" CELLSPACING="0" WIDTH="100%" BGCOLOR="#000000"><TR><TD>
+<TABLE BORDER="0" WIDTH="100%" BGCOLOR="#FFFFFF">
+<TR>
+<TD ALIGN="left"><H1>Data.FormValidator</H1></TD>
+<TD ALIGN="right"><A href="http://developer.berlios.de" title="BerliOS Developer"> <img src="http://developer.berlios.de/bslogo.php?group_id=4847" width="124px" height="32px" border="0" alt="BerliOS Developer Logo"></A></TD>
+</TR>
+</TABLE>
+<TABLE BORDER="0" WIDTH="100%" BGCOLOR="#DEDEEE">
+<TR>
+    <TH><A HREF="https://developer.berlios.de/projects/formvalidatorjs/">Project Page</A></TH>
+    <TH><A HREF="http://www.openjsan.org/doc/u/un/unrtst/Data/FormValidator/0.02/index.html">JSAN listing</A></TH>
+    <TH><A HREF="ex1.html">Demo</A></TH>
+    <TH><A HREF="https://developer.berlios.de/project/showfiles.php?group_id=4847&release_id=7409">Download</A></TH>
+</TR>
+</TABLE>
+</TD></TR></TABLE>
+
+<BR>
+
+<BLOCKQUOTE>
+<UL>
+<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
+<LI><A HREF="#SYNOPSIS">SYNOPSIS</A>
+<LI><A HREF="#USAGE">USAGE</A>
+    <UL>
+    <LI><A HREF="#PROFILE">PROFILE</A>
+    <LI><A HREF="#EASY_VALIDATION">EASY_VALIDATION</A>
+    <LI><A HREF="#CUSTOM_VALIDATION">CUSTOM_VALIDATION</A>
+    </UL>
+<LI><A HREF="#FURTHER_READING">FURTHER_READING</A>
+</UL>
+</BLOCKQUOTE>
+
+
+<B><A name="DESCRIPTION">DESCRIPTION</A></B>
+<BLOCKQUOTE>
+<P>
+Data.FormValidator's aim is to bring all the benefits of the perl module <A HREF="http://search.cpan.org/dist/Data-FormValidator/">Data::FormValidator</A> over to javascript, using the same input profiles (they can be dumped into javascript objects using the perl module <A HREF="http://search.cpan.org/dist/Data-JavaScript">Data::JavaScript</A>.
+</P>
+
+<P>
+Data.FormValidator lets you define profiles which declare the
+required and optional fields and any constraints they might have.
+</P>
+
+<P>
+The results are provided as an object which makes it easy to handle 
+missing and invalid results, return error messages about which constraints
+failed, or process the resulting valid data.
+</P>
+<P>
+<B>IMPORTANT NOTE:</B> JavaScript form validation is NOT a replacement for data validation in your backend scripts. This is the primary reason this module was written... so that it would be easy to share the same validation profile for both the frontend (via Data.FormValidator.js) and backend (via Data::FormValidator.pm).
+</P>
+</BLOCKQUOTE><!-- end of DESCRIPTION -->
+
+<B><A name="SYNOPSIS">SYNOPSIS</A></B>
+<BLOCKQUOTE>
+<PRE>&lt;FORM onSubmit="return myValidate(this);"&gt;
+First Name&lt;INPUT TYPE="text" name="firstname"&gt;
+Last Name&lt;INPUT TYPE="text" name="lastname"&gt;
+Age&lt;INPUT TYPE="text" name="age"&gt;
+&lt;INPUT TYPE="submit"&gt;
+&lt;/FORM&gt;
+&lt;SCRIPT LANGUAGE="javascript" type="text/javascript" src="lib/Data/FormValidator.js"&gt;
+&lt;SCRIPT LANGUAGE="javascript"&gt;&lt;!--
+    function myValidate (frmObj) {
+        var myProfile = new Object;
+        profile.required = new Array('firstname', 'lastname');
+        profile.optional = new Array('age');
+        var passed = Data.FormValidator.check_and_report(frmObj, profile, goodColor, badColor);
+        return passed;
+    }
+// --&gt;&lt;/SCRIPT&gt;
+</PRE>
+</BLOCKQUOTE>
+
+<B><A name="USAGE">USAGE</A></B>
+<BLOCKQUOTE>
+<B><A name="PROFILE">PROFILE</A></B>
+<BLOCKQUOTE>
+<P>
+With this validator, the meat of it is in what we refer to as the "profile".</P>
+<P>
+The validator "profile" defines all the rules for what is valid in your form. For example, required fields, fields which are required only if some other field is filled out, fields that must only contain numbers, etc.</P>
+<P>
+The profile may be built by hand, if you like, but I find it far easier to generate the profile from perl (where this validator has its roots).</P>
+<P>
+A very simple profile in javascript might look something like this:
+<BLOCKQUOTE>
+<PRE>var myProfile = new Object;
+profile.required = new Array('firstname', 'lastname', 'date_of_birth');</PRE>
+</BLOCKQUOTE>
+The above would simply require that those three fields be filled in.
+<P>
+Here's a bit more complex (though still simple) profile in perl:<BR>
+(NOTE: <I>The profile below may be translated into javascript using the <A HREF="http://search.cpan.org/dist/Data-JavaScript">Data::JavaScript</A> perl module.</I>)
+<BLOCKQUOTE>
+<PRE>my $profile = {
+    optional =&gt; [qw( company age fax country )],
+    required =&gt; [qw( fullname phone email address )],
+    constraints =&gt; {
+        email =&gt; { name =&gt; "valid_email",
+                   constraint =&gt; "/^(([a-z0-9_\\.\\+\\-\\=\\?\\^\\#]){1,64}\\@(([a-z0-9\\-]){1,251}\\.){1,252}[a-z0-9]{2,4})$/i" },
+        age =&gt; { name =&gt; "valid_age",
+                 constraint =&gt; "/^1?\d?\d$/" },
+    },
+    msgs =&gt; {
+        constraints =&gt; {
+            valid_email =&gt; "Invalid e-mail address format",
+            valid_age   =&gt; "Age entered must be between 0 and 199",
+        }
+    },
+};</PRE>
+</BLOCKQUOTE>
+The "optional" and "required" are probably self explainitory. Constraints add all the cool stuff.</P>
+<P>
+In the above, the form field "email" must be filled in, AND it must match that awfully long regular expression that looks like line noise (that was borrowed from a built in constraint in the perl module Data::FormValidator).<BR>
+If, and only if, the "age" field, it must match the constrint in it, which is a regular expression that would mean it has to be between 0 and 199.<BR>
+The "name" keys in the constraints allow you to tie in the "msgs" hash, which is used for error reporting.</P>
+<P>
+Your constraints may also be quite a lot simpler. For example, if you just want to make sure something is a whole number, the following is sufficient: "/^\d+$/".</P>
+<P>The profile defined above would be specified as the following in javascript:
+<BLOCKQUOTE>
+<PRE>var profile = new Object;
+profile.optional = new Array( 'company', 'age', 'fax', 'country' );
+profile.required = new Array( 'fullname', 'phone', 'email', 'address' );
+profile.constraints = new Object;
+profile.constraints.email = new Object;
+profile.constraints.email.name = 'valid_email';
+profile.constraints.email.constraint = '\/\^\(\(\[a\-z0\-9_\\\.\\\+\\\-\\\=\\\?\\\^\\\#\]\)\{1\,64\}\\\@\(\(\[a\-z0\-9\\\-\]\)\{1\,251\}\\\.\)\{1\,252\}\[a\-z0\-9\]\{2\,4\}\)\012i';
+profile.constraints.age = new Object;
+profile.constraints.age.name = 'valid_email';
+profile.constraints.age.constraint = '\/\^1\?\\d\?\\d\012';
+profile.msgs = new Object;
+profile.msgs.constraints = new Object;
+profile.msgs.constraints.valid_email = 'Invalid e\-mail address format';
+profile.msgs.constraints.valid_age = 'Age entered must be between 0 and 199';</PRE>
+</BLOCKQUOTE>
+</P>
+</BLOCKQUOTE><!-- end of USAGE-PROFILE -->
+
+<B><A name="EASY_VALIDATION">EASY VALIDATION</A></B>
+<BLOCKQUOTE>
+<P>
+Once you've got your profile, You'll need to:<UL>
+<LI>Pull in the Data.FormValidation.js library.
+<PRE>&lt;SCRIPT LANGUAGE="javascript" type="text/javascript" src="lib/Data/FormValidator.js"&gt;</PRE>
+
+<LI>Add a short validation function somewhere in the script (anywhere you want).
+<PRE>&lt;SCRIPT LANGUAGE="javascript"&gt;&lt;!--
+    function myValidate (frmObj) {
+        var myProfile = new Object;
+        profile.required = new Array('firstname', 'lastname');
+        profile.optional = new Array('age');
+        var passed = Data.FormValidator.check_and_report(frmObj, profile, goodColor, badColor);
+        return passed;
+    }
+// --&gt;&lt;/SCRIPT&gt;</PRE>
+
+<LI>Add an onSubmit handler in your "FORM" tag. If you have more than one form on the page, you can add multiple validation functions.
+<PRE>&lt;FORM onSubmit="return myValidate(this);"&gt;</PRE>
+</UL>
+That's it. Your form now has data validation!
+</P>
+
+</BLOCKQUOTE><!-- end of EASY VALIDATION-->
+
+<B><A name="CUSTOM_VALIDATION">CUSTOM VALIDATION</A></B>
+<BLOCKQUOTE>
+<P>
+The "check_and_report()" method is just a convenient wrapper around the workings of Data.FormValidator.js. It provides you with a default, and very easy, way to report on validation failures, should there be any. However, you're not required to use it by any means.</P>
+<P>
+Data.FormValidator.js is an object oriented validation library. It can give you a TON of information about how the validation worked out, which you can use to report on its success/failure in any way you like. The docs included with the distribution cover this much better than I will here. Below is an example of how you could roll your own wrapper method (this was the source to "check_and_report()" at one time).
+<BLOCKQUOTE>
+<PRE>function myValidate (frmObj) {
+    var goodColor = "#FFFFFF";
+    var badColor  = "#FFFF99";
+
+    var profile = new Object;
+    // define profile ...
+    var results = Data.FormValidator.check(frmObj, profile);
+    // clean up colors from form
+    results.cleanForm(frmObj, goodColor);
+    if (! results.success()) {
+        var error_text = "";
+        var msgs = results.msgs();
+        for (field in results.missing_required) {
+            results.changeStyle(frmObj, field, badColor);
+            error_text += "Field ["+field+"] is required.\n";
+        }
+        for (field in results.missing_dependency) {
+            for (i in results.missing_dependency[field]) {
+                var dep = results.missing_dependency[field][i];
+                results.changeStyle(frmObj, dep, badColor);
+                error_text += "Marking field ["+field+"] requires field ["+dep+"] also be filled in.\n";
+            }
+        }
+        for (group in results.missing_depgroup) {
+            var completed  = results.missing_depgroup[group]['completed'];
+            var incomplete = results.missing_depgroup[group]['incomplete'];
+            for (i in incomplete) {
+                results.changeStyle(frmObj, incomplete[i], badColor);
+            }
+            error_text += "Marking field(s) ["+completed.join(', ')+"] requires field(s) ["+incomplete.join(', ')+"] also be filled in.\n";
+        }
+        for (field in results.invalid) {
+            results.changeStyle(frmObj, field, badColor);
+            error_text += (msgs[field]) ? "Field ["+field+"] : "+msgs[field] :
+                                          "Improperly formatted data in field ["+field+"].";
+            error_text += "\n";
+        }
+
+        alert("There is a problem with your form.\n\n"+error_text);
+        return false;
+
+    } else {
+        // do something with results.valid ?
+        return true;
+    } 
+};
+
+</PRE>
+</BLOCKQUOTE>
+</BLOCKQUOTE><!-- end of CUSTOM VALIDATION-->
+
+
+</BLOCKQUOTE><!-- end of USAGE -->
+
+<B><A name="FURTHER_READING">FURTHER READING</A></B>
+<BLOCKQUOTE>
+<P>
+To get a better idea of what this module use capable of, please see its documentation <A HREF="http://www.openjsan.org/doc/u/un/unrtst/Data/FormValidator/0.02/index.html">at JSAN</A>.</P>
+<P>
+Because this module was based on the <A HREF="http://search.cpan.org/dist/Data-FormValidator/">Data::FormValidator</A> perl module, reading its thorough documentation can also be of great benifit.</P>
+</BLOCKQUOTE>
+
+
+</BODY>
+
+</HTML>
