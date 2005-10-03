@@ -445,9 +445,9 @@ The key is an arbitrary name you create. The values are arrays of field names in
 
  constraints => {
     fieldName1  => '/regexp/i',
-    fieldName2  => { name => 'all_numbers', constraint => '/^\d+$/' },
-    fieldName3  => [ { name => 'no_spaces', constraint => '/^\S*$/' },
-                     { name => 'word_chars', constraint => '/^\w+$/' } ],
+    fieldName2  => { name => 'all_numbers', constraint => '/^\\d+$/' },
+    fieldName3  => [ { name => 'no_spaces', constraint => '/^\\S*$/' },
+                     { name => 'word_chars', constraint => '/^\\w+$/' } ],
  }
 
 The second and third form above are recommended, as they allow you to tie the constraint to a custom error message (through the msgs hash).
@@ -467,7 +467,7 @@ A) the constraint must be named. Eg:
 
     profile => {
         constraints => {
-            fieldName   => { name => 'someName', constraint => '/\d+/' },
+            fieldName   => { name => 'someName', constraint => '/\\d+/' },
         },
     };
 
@@ -984,11 +984,17 @@ Data.FormValidator.Results.prototype._process = function (profile, frmObj) {
                         }
 
                     // Test for built in constraint
-                    } else if (this.constraints.supported(c.constraint)) {
+                    } else if ( this.constraints.supported(c.constraint) ||
+                                this.constraints.supported('valid_'+c.constraint) ||
+                                this.constraints.supported('match_'+c.constraint)    ) {
+                        var constraint = this.constraints.supported(c.constraint)          ? c.constraint :
+                                         this.constraints.supported("valid_"+c.constraint) ? "valid_"+c.constraint :
+                                         this.constraints.supported("match_"+c.constraint) ? "match_"+c.constraint :
+                                                                                             "unknown";
                         var fieldValues = this.getField(frmObj, fieldName);
                         /* NOTE: every value must pass (not one pass and all pass */
                         for (var x=0; x<fieldValues.length; x++) {
-                            if (! this.constraints[c.constraint](fieldValues[x])) {
+                            if (! this.constraints[constraint](fieldValues[x])) {
                                 failedTest = true;
                             }
                         }
@@ -1171,28 +1177,27 @@ Data.FormValidator.Constraints = function () {
 };
 
 Data.FormValidator.Constraints.prototype.supported = function (val) {
-    var _t = new Array;
-    t['email']             = 1;
-    t['state_or_province'] = 1;
-    t['state']             = 1;
-    t['province']          = 1;
-    t['zip_or_postcode']   = 1;
-    t['postcode']          = 1;
-    t['zip']               = 1;
-    t['phone']             = 1;
-    t['american_phone']    = 1;
-    t['cc_number']         = 1;
-    t['cc_exp']            = 1;
-    t['cc_type']           = 1;
-    t['ip_address']        = 1;
+    var t = new Array;
+    t['match_email']             = 1;
+    t['match_state_or_province'] = 1;
+    t['match_state']             = 1;
+    t['match_province']          = 1;
+    t['match_zip_or_postcode']   = 1;
+    t['match_postcode']          = 1;
+    t['match_zip']               = 1;
+    t['match_phone']             = 1;
+    t['match_american_phone']    = 1;
+    t['match_cc_number']         = 1;
+    t['match_cc_exp']            = 1;
+    t['match_cc_type']           = 1;
+    t['match_ip_address']        = 1;
     return t[val] ? true : false;
 };
 
 Data.FormValidator.Constraints.prototype.constraint_match_re = function (val, re, re_opt) {
-    var re = new RegExp;
-    re.compile(re, re_opt);
+    var re = new RegExp(re, re_opt);
     var re_parts;
-    if (re_parts = re(val)) {
+    if (re_parts = re.exec(val)) {
         return re_parts[1];
     } else {
         return false;
@@ -1200,40 +1205,50 @@ Data.FormValidator.Constraints.prototype.constraint_match_re = function (val, re
 };
 
 Data.FormValidator.Constraints.prototype.match_email = function (val) {
-    return this.constraint_match_re(val, '^(([a-z0-9_\.\+\-\=\?\^\#]){1,64}\@(([a-z0-9\-]){1,251}\.){1,252}[a-z0-9]{2,4})$','i');
+    return this.constraint_match_re(val, '^(([a-z0-9_\\.\\+\\-\\=\\?\\^\\#]){1,64}\\@(([a-z0-9\\-]){1,251}\\.){1,252}[a-z0-9]{2,4})$','i');
 };
 Data.FormValidator.Constraints.prototype.match_postcode = function (val) {
-    return this.constraint_match_re(val, '^([ABCEGHJKLMNPRSTVXYabceghjklmnprstvxy][_\W]*\d[_\W]*[A-Za-z][_\W]*[- ]?[_\W]*\d[_\W]*[A-Za-z][_\W]*\d[_\W]*)$');
+    return this.constraint_match_re(val, '^([ABCEGHJKLMNPRSTVXYabceghjklmnprstvxy][_\\W]*\\d[_\\W]*[A-Za-z][_\\W]*[- ]?[_\\W]*\\d[_\\W]*[A-Za-z][_\\W]*\\d[_\\W]*)$');
 };
 Data.FormValidator.Constraints.prototype.match_zip = function (val) {
-    return this.constraint_match_re(val, '^(\s*\d{5}(?:[-]\d{4})?\s*)$');
+    // js doesn't support the look-ahead (?:) : '^\\s*(\\d{5}(?:[-]\\d{4})?)\\s*$'
+    return this.constraint_match_re(val, '^\\s*(\\d{5}(\\-\\d{4})?)\\s*$');
 };
 Data.FormValidator.Constraints.prototype.match_phone = function (val) {
-    return this.constraint_match_re(val, '^((?:\D*\d\D*){6,})$');
+    // TODO: I don't like this check, because it allows "asdfasfd123432sfdasfd23".
+    //       But, it's what Data::FormValidator.pm uses.
+    // js doesn't support the look-ahead (?:) : '^((?:\\D*\\d\\D*){6,})$'
+    return this.constraint_match_re(val, '^((\\D*\\d\\D*){6,})$');
 };
 Data.FormValidator.Constraints.prototype.match_american_phone = function (val) {
-    return this.constraint_match_re(val, '^((?:\D*\d\D*){7,})$');
+    // TODO: I don't like this check, because it allows "asdfasfd123432sfdasfd23".
+    //       But, it's what Data::FormValidator.pm uses.
+    // js doesn't support the look-ahead (?:) : '^((?:\\D*\\d\\D*){7,})$'
+    return this.constraint_match_re(val, '^((\\D*\\d\\D*){7,})$');
 };
 Data.FormValidator.Constraints.prototype.match_state = function (val) {
-    if (this.state_list.indexOf(" "+val+" ") == -1) {
+    var uc_val = val.toUpperCase();
+    if (this.state_list.indexOf(" "+uc_val+" ") == -1) {
         return false;
     } else {
-        return val;
+        return uc_val;
     }
 };
 Data.FormValidator.Constraints.prototype.match_province = function (val) {
-    if (this.province_list.indexOf(" "+val+" ") == -1) {
+    var uc_val = val.toUpperCase();
+    if (this.province_list.indexOf(" "+uc_val+" ") == -1) {
         return false;
     } else {
-        return val;
+        return uc_val;
     }
 };
 Data.FormValidator.Constraints.prototype.match_state_or_province = function (val) {
-    if (this.match_state(val)) {
-        return val;
+    var match;
+    if (match = this.match_state(val)) {
+        return match;
     }
-    if (this.match_province(val)) {
-        return val;
+    if (match = this.match_province(val)) {
+        return match;
     }
     return false;
 };
@@ -1250,10 +1265,11 @@ Data.FormValidator.Constraints.prototype.match_zip_or_postcode = function (val) 
 
 Data.FormValidator.Constraints.prototype.match_cc_number = function (the_card, card_type) {
 
-    var card_type_abbr = card_type.toLowerCase.substr(0,1);
+    card_type = card_type || "UNKNOWN";
+    var card_type_abbr = card_type.toLowerCase().substr(0,1);
 
     // get rid of any extra cruft in the card number
-    var card_re = /\D/gi;
+    var card_re = /\\D/gi;
     var new_card = the_card.replace(card_re, '');
 
     if (new_card.length == 0) return false;
@@ -1296,9 +1312,9 @@ Data.FormValidator.Constraints.prototype.match_cc_number = function (the_card, c
          *       make sure it was solid digits, but the below behavior *
          *       is that of Data::FormValidator.pm, and consistency is *
          *       more important than my druthers.                      */
-        var final_re = /^([\d\s]*)$/;
+        var final_re = /^([\\d\\s]*)$/;
         var re_parts;
-        if (re_parts = final_re(the_card)) {
+        if (re_parts = final_re.exec(the_card)) {
             return re_parts[1];
         } else {
             return false;
@@ -1313,9 +1329,9 @@ Data.FormValidator.Constraints.prototype.match_cc_exp = function (val) {
     var matched_year;
 
     var re = new RegExp;
-    re.compile('^(\d+)/(\d+)$');
+    re.compile('^(\\d+)/(\\d+)$');
     var re_parts;
-    if (re_parts = re(val)) {
+    if (re_parts = re.exec(val)) {
         matched_month = re_parts[1];
         matched_year  = re_parts[2];
     } else {
@@ -1350,7 +1366,7 @@ Data.FormValidator.Constraints.prototype.match_cc_type = function (val) {
 // TODO: I don't like this check, because it doesn't account
 //       for non-dotted quads. But, it's what Data::FormValidator.pm uses.
 Data.FormValidator.Constraints.prototype.match_ip_address = function (val) {
-    var ip = this.constraint_match_re(val, '^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$');
+    var ip = this.constraint_match_re(val, '^(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})$');
     if (! ip) return false;
 
     // make sure each segment of the dotted quad is between 0 and 255
@@ -1729,9 +1745,9 @@ Data.FormValidator.Results.prototype.blankText = function (textObj) {
     if (textObj==null) { return true; }
     for (var i=0; i<textObj.length; i++) {
         if ( (textObj.charAt(i)!=' ')  &&
-             (textObj.charAt(i)!="\\t") &&
-             (textObj.charAt(i)!="\\n") &&
-             (textObj.charAt(i)!="\\r")    ) {
+             (textObj.charAt(i)!="\t") &&
+             (textObj.charAt(i)!="\n") &&
+             (textObj.charAt(i)!="\r")    ) {
             return false;
         }
     }
