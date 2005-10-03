@@ -23,7 +23,7 @@ Data.FormValidator - Validate HTML form input based on input profile.
     var goodColor = "#FFFFFF";
     var badColor  = "#FFFF99";
 
-    var profile = new Object;
+    var profile = new Object();
     // define profile ...
 
     // put any extras you'd like in here
@@ -51,7 +51,7 @@ ALTERNATIVELY: the following is a more detailed handling, and is actually what h
     var goodColor = "#FFFFFF";
     var badColor  = "#FFFF99";
 
-    var profile = new Object;
+    var profile = new Object();
     // define profile ...
     var results = Data.FormValidator.check(frmObj, profile);
     // clean up colors from form
@@ -200,7 +200,7 @@ The resulting "results" object can be used to call has_missing(), has_invalid(),
 
 */
 Data.FormValidator.prototype.check = function (frmObj, profile) {
-    var defaults = new Object;
+    var defaults = new Object();
     defaults.profile_file = this.profile_file;
     defaults.profiles     = this.profiles;
     defaults.defaults     = this.defaults;
@@ -509,21 +509,21 @@ Data.FormValidator.Results - results of form input validation.
     var msgs = results.msgs();
 
     // Print the name of missing fields
-    if ( results.has_missing ) {
+    if ( results.has_missing() ) {
         for (f in results.missing) {
             alert(f + " is missing\n");
         }
     }
 
     // Print the name of invalid fields
-    if ( results.has_invalid ) {
+    if ( results.has_invalid() ) {
         for (f in results.invalid) {
             alert(f + " is invalid: " + msgs[f] + "\n");
         }
     } 
 
     // Print unknown fields
-    if ( results.has_unknown ) {
+    if ( results.has_unknown() ) {
         for (f in results.unknown) {
             alert(f + " is unknown\n");
         }
@@ -548,7 +548,7 @@ Data.FormValidator.Results = function (profile, frmObject) {
 // TODO: not sure if we need defaults or not?
 //    this.defaults     = defaults;
 
-    this.constraints = new Data.FormValidator.Constraints;
+    this.constraints = new Data.FormValidator.Constraints();
 
     this._process(profile, frmObject);
 };
@@ -692,7 +692,7 @@ First element of each row is the "fieldName". The remainder of the elements are 
 
     for (i in results.validate_invalid) {
         var fieldName = results.validate_invalid[i];
-        var failedTests = new Array;
+        var failedTests = new Array();
         for (var j=1; j<results.validate_invalid.length; j++) {
             failedTests[failedTests.length] = results.validate_invalid[j];
         }
@@ -806,7 +806,7 @@ Data.FormValidator.Results.prototype.valid = function (key, val) {
     if (typeof(key) != "undefined") return this.valid[key];
 
     // if we got this far, there were no arguments passed.
-    var rv = new Array;
+    var rv = new Array();
     for (fieldName in this.valid) {
         rv[rv.length] = fieldName;
     }
@@ -842,7 +842,7 @@ Data.FormValidator.Results.prototype._process = function (profile, frmObj) {
     this.missing_depgroup   = new Object();
 
     // pre-compile the acceptable regexp test
-    this.regexp_test = new RegExp;
+    this.regexp_test = new RegExp();
     this.regexp_test.compile('^/(.*)/(g|i|gi|ig)?$');
 
     // Build lookup of required and optional fields
@@ -897,8 +897,8 @@ Data.FormValidator.Results.prototype._process = function (profile, frmObj) {
         for (group in profile.dependency_groups) {
             if (this.isArray(profile.dependency_groups[group])) {
                 var require_all = false;
-                var completed   = new Array;
-                var incomplete  = new Array;
+                var completed   = new Array();
+                var incomplete  = new Array();
                 for (i in profile.dependency_groups[group]) {
                     var fieldName = profile.dependency_groups[group][i];
                     if (! this.emptyField(frmObj, fieldName)) {
@@ -917,7 +917,7 @@ Data.FormValidator.Results.prototype._process = function (profile, frmObj) {
                         }
                     }
                     if (missed_depgroup) {
-                        this.missing_depgroup[group] = new Object;
+                        this.missing_depgroup[group] = new Object();
                         this.missing_depgroup[group]['completed']  = completed;
                         this.missing_depgroup[group]['incomplete'] = incomplete;
                     }
@@ -952,7 +952,7 @@ Data.FormValidator.Results.prototype._process = function (profile, frmObj) {
                 for (i in checks) {
                     var check = checks[i];
                     // Determine waht the name and constraint are for this check
-                    var c = new Object;
+                    var c = new Object();
                     c.name       = check;
                     c.constraint = check;
                     // Constraints can be passed in directly or via hash
@@ -1010,7 +1010,7 @@ Data.FormValidator.Results.prototype._process = function (profile, frmObj) {
                         // this.invalid is a hash keyed by invalid field
                         // names. Value is an array of the checks it failed.
                         if (! this.isArray(this.invalid[fieldName])) {
-                            this.invalid[fieldName] = new Array;
+                            this.invalid[fieldName] = new Array();
                         }
                         this.invalid[fieldName][this.invalid[fieldName].length] = c.name;
                     }
@@ -1022,7 +1022,7 @@ Data.FormValidator.Results.prototype._process = function (profile, frmObj) {
     // the older interface to validate returned things differently
     for (fieldName in this.invalid) {
         if (this.isArray(this.invalid[fieldName])) {
-            var tempArray = new Array;
+            var tempArray = new Array();
             tempArray[0] = fieldName;
             for (i in this.invalid[fieldName]) {
                 tempArray[tempArray.length] = this.invalid[fieldName][i];
@@ -1060,7 +1060,7 @@ Data.FormValidator.Constraints - Basic sets of constraints on input profile.
 
 =head1 SYNOPSIS
 
-    var constraints = new Data.FormValidator.Constraints;
+    var constraints = new Data.FormValidator.Constraints();
     if (constraints.supported('email')) {
         var match;
         if (match = constraints.email(value)) {
@@ -1177,7 +1177,7 @@ Data.FormValidator.Constraints = function () {
 };
 
 Data.FormValidator.Constraints.prototype.supported = function (val) {
-    var t = new Array;
+    var t = new Array();
     t['match_email']             = 1;
     t['match_state_or_province'] = 1;
     t['match_state']             = 1;
@@ -1264,13 +1264,13 @@ Data.FormValidator.Constraints.prototype.match_zip_or_postcode = function (val) 
 };
 
 Data.FormValidator.Constraints.prototype.match_cc_number = function (the_card, card_type) {
-
+card_type = 'visa';
     card_type = card_type || "UNKNOWN";
-    var card_type_abbr = card_type.toLowerCase().substr(0,1);
+    var card_type_abbr = card_type.toLowerCase().charAt(0);
 
     // get rid of any extra cruft in the card number
-    var card_re = /\\D/gi;
-    var new_card = the_card.replace(card_re, '');
+    var card_re = /\D/gi;
+    var new_card = the_card.toString().replace(card_re, '');
 
     if (new_card.length == 0) return false;
 
@@ -1285,7 +1285,7 @@ Data.FormValidator.Constraints.prototype.match_cc_number = function (the_card, c
         return false;
     }
 
-    var card_first_digit = new_card.substr(0,1);
+    var card_first_digit = new_card.charAt(0);
     var card_length      = new_card.length;
     if ( (card_first_digit == '3' && card_length != 15) ||
          (card_first_digit == '4' && card_length != 13 && card_length != 16) ||
@@ -1298,7 +1298,7 @@ Data.FormValidator.Constraints.prototype.match_cc_number = function (the_card, c
     var the_sum = 0;
     var multiplier = 2; // alternates between 2 and 1, starting w/ 2
     for (var i=(card_length -2); i >= 0; i--) {
-        var digit = parseInt(new_card.substr(i,1));
+        var digit = parseInt(new_card.charAt(i), 10);
         var product = multiplier * digit;
         the_sum += (product > 9) ? product - 9 : product;
         multiplier = 3 - multiplier;
@@ -1307,12 +1307,12 @@ Data.FormValidator.Constraints.prototype.match_cc_number = function (the_card, c
     if (the_sum) the_sum = 10 - the_sum;
 
     // return whether the checksum matched
-    if (the_sum == new_card.substr(card_length -2, 1)) {
+    if (the_sum == new_card.charAt(card_length -1)) {
         /* NOTE: I'd feel fine returning "new_card", since we already  *
          *       make sure it was solid digits, but the below behavior *
          *       is that of Data::FormValidator.pm, and consistency is *
          *       more important than my druthers.                      */
-        var final_re = /^([\\d\\s]*)$/;
+        var final_re = /^([\d\s]*)$/;
         var re_parts;
         if (re_parts = final_re.exec(the_card)) {
             return re_parts[1];
@@ -1328,26 +1328,25 @@ Data.FormValidator.Constraints.prototype.match_cc_exp = function (val) {
     var matched_month;
     var matched_year;
 
-    var re = new RegExp;
-    re.compile('^(\\d+)/(\\d+)$');
+    var re = new RegExp('^(\\d+)/(\\d+)$');
     var re_parts;
     if (re_parts = re.exec(val)) {
-        matched_month = re_parts[1];
-        matched_year  = re_parts[2];
+        matched_month = parseInt(re_parts[1],10);
+        matched_year  = parseInt(re_parts[2],10);
     } else {
         return false;
     }
 
     if (matched_month < 1 || matched_month > 12) return false;
     if (matched_year < 1900) {
-        year += (year < 70) ? 2000 : 1900;
+        matched_year += (matched_year < 70) ? 2000 : 1900;
     }
-    var now = new Date;
-    var nowMonth = now.getMonth;
+    var now = new Date();
+    var nowMonth = now.getMonth();
     // getFullYear is only supported in js 1.3, and getYear
     // is inconsitent, but oh well.
-    var nowYear = now.getYear;
-    if (nowYear.length < 4) {
+    var nowYear = now.getYear();
+    if (nowYear.toString().length < 4) {
         nowYear += 1900;
     }
 
@@ -1408,13 +1407,13 @@ NOTE: the messages for missing data sets are very bland. You'd be better off pro
  * This method returns a hash reference to error messages.               */
 Data.FormValidator.Results.prototype.msgs = function (controls) {
 
-    var profile = new Object;
+    var profile = new Object();
     profile.prefix  = '';
     profile.missing = 'Missing';
     profile.invalid = 'Invalid';
     profile.invalid_separator = ' ';
     profile.format  = '<span style="color:red;font-weight:bold"><span class="dfv_errors">* %s</span></span>';
-    profile.constraints = new Object;
+    profile.constraints = new Object();
     if ( (typeof(this.profile.msgs)=="object") &&
          (! this.isArray(this.profile.msgs)) ) {
         for (key in this.profile.msgs) {
@@ -1422,15 +1421,15 @@ Data.FormValidator.Results.prototype.msgs = function (controls) {
         }
     }
 
-    var msgs = new Object;
+    var msgs = new Object();
 
     /* Add invalid messages to hash                          *
      * look at all the constraints, look up their messages   *
      * (or provide a default)                                *
      * add field + formatted constraint message to hash      */
-    if (this.has_invalid) {
+    if (this.has_invalid()) {
         for (field in this.invalid) {
-            var invalidTests = new Array;
+            var invalidTests = new Array();
             for (i in this.invalid[field]) {
                 var invalidName = this.invalid[field][i];
                 var err_msg = profile.constraints[invalidName] || profile.invalid;
@@ -1441,7 +1440,7 @@ Data.FormValidator.Results.prototype.msgs = function (controls) {
     }
 
     /* Add missing messages, if any */
-    if (this.has_missing) {
+    if (this.has_missing()) {
         for (field in this.missing) {
             msgs[field] = profile.missing;
         }
@@ -1631,7 +1630,7 @@ NOTE: this always returns an array
 /* Takes the form object, and a form element name              *
  * Returns an array of elements, or false if it doesn't exist. */
 Data.FormValidator.Results.prototype.getElementListByName = function (frmObj, elementName) {
-    var elList = new Array;
+    var elList = new Array();
     if ( (!frmObj.length) || (frmObj.length <= 0) ) {
         return false; // bad form passed in
     }
@@ -1720,12 +1719,18 @@ Data.FormValidator.Results.prototype.hasRadioOrCheckbox = function (thisObj) {
 /* return array of text values, with empty elements if the field(s) are blank */
 Data.FormValidator.Results.prototype.hasMCEText = function (mceObj) {
     var allData = new Array();
-    /* TODO: we currently use calls from the TinyMCE library    *
-     *       we should probably separate our dependency on that *
-     *       and include equivilant code in here                */
+    /* If tinyMCE is loaded (we guess based on the namespace)   *
+     * then we use calls from teh TinyMCE library.              *
+     * Otherwise, we treat this like a normal text field, and   *
+     * hope for the best.                                       */
     var fieldName = mceObj.name;
-    tinyMCE.execInstanceCommand(fieldName, 'mceFocus');
-    allData[allData.length] = tinyMCE.getContent();
+    if ( typeof tinyMCE == "undefined" ) {    
+        var txtData = this.hasText(mceObj);
+        if (txtData) allData = txtData;
+    } else {
+        tinyMCE.execInstanceCommand(fieldName, 'mceFocus');
+        allData[allData.length] = tinyMCE.getContent();
+    }
     return (allData.length > 0) ? allData : false;
 };
 
@@ -1797,7 +1802,7 @@ Data.FormValidator.Results.prototype.emptyField = function (frmObj, fieldName) {
  * (all instances of such named field).                              *
  * NOTE: this always returns an array                                */
 Data.FormValidator.Results.prototype.getField = function (frmObj, fieldName) {
-    var returnValue = new Array;
+    var returnValue = new Array();
 
     var elList = this.getElementListByName(frmObj, fieldName);
     if (! this.isArray(elList)) { // make sure we have form elements
