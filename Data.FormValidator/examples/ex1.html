@@ -19,7 +19,22 @@
                             #textarea1
                             #reset1
                             #hidden1
-        optional    => [qw( textarea1 text2 )],
+        optional    => [qw( textarea1 text2
+                            email
+                            state
+                            province
+                            state_or_province
+                            zip
+                            postcode
+                            zip_or_postcode
+                            phone
+                            american_phone
+                            cc_number
+                            cc_exp
+                            cc_type
+                            ip_address
+                          )
+                       ],
         dependencies    => {
             text1   => [ qw(textarea1 checkbox1) ],
             },
@@ -35,6 +50,19 @@
             select1     => '/test/i',
             select2     => '/test/i',
             select3     => '/test/i',
+            email       => 'email',
+            state       => 'state',
+            province    => 'province',
+            state_or_province   => 'state_or_province',
+            zip         => 'zip',
+            postcode    => 'postcode',
+            zip_or_postcode     => 'zip_or_postcode',
+            phone       => 'phone',
+            american_phone      => 'american_phone',
+            cc_number   => 'cc_number',
+            cc_exp      => 'cc_exp',
+            cc_type     => 'cc_type',
+            ip_address  => 'ip_address',
             },
         msgs    => {
             format      => '%s',
@@ -74,6 +102,19 @@ myProfile.constraints.text1 = '\/bob\/i';
 myProfile.constraints.textarea1 = new Object;
 myProfile.constraints.textarea1.name = 'textarea1';
 myProfile.constraints.textarea1.constraint = '\/bob\/i';
+myProfile.constraints.email = 'email';
+myProfile.constraints.state = 'state';
+myProfile.constraints.province = 'province';
+myProfile.constraints.state_or_province = 'state_or_province';
+myProfile.constraints.zip = 'zip';
+myProfile.constraints.postcode = 'postcode';
+myProfile.constraints.zip_or_postcode = 'zip_or_postcode';
+myProfile.constraints.phone = 'phone';
+myProfile.constraints.american_phone = 'american_phone';
+myProfile.constraints.cc_number = 'cc_number';
+myProfile.constraints.cc_exp = 'cc_exp';
+myProfile.constraints.cc_type = 'cc_type';
+myProfile.constraints.ip_address = 'ip_address';
 myProfile.required = new Array;
 myProfile.required[0] = 'password1';
 myProfile.required[1] = 'tinymcetext';
@@ -92,6 +133,19 @@ myProfile.dependencies.text1[1] = 'checkbox1';
 myProfile.optional = new Array;
 myProfile.optional[0] = 'textarea1';
 myProfile.optional[1] = 'text2';
+myProfile.optional[2] = 'email';
+myProfile.optional[3] = 'state_or_province';
+myProfile.optional[4] = 'state';
+myProfile.optional[5] = 'province';
+myProfile.optional[6] = 'zip_or_postcode';
+myProfile.optional[7] = 'postcode';
+myProfile.optional[8] = 'zip';
+myProfile.optional[9] = 'phone';
+myProfile.optional[10] = 'american_phone';
+myProfile.optional[11] = 'cc_number';
+myProfile.optional[12] = 'cc_exp';
+myProfile.optional[13] = 'cc_type';
+myProfile.optional[14] = 'ip_address';
 myProfile.msgs = new Object;
 myProfile.msgs.constraints = new Object;
 myProfile.msgs.constraints.select2 = 'We are sorry\, but the textarea must contain the text \'bob\' somewhere within its message';
@@ -176,6 +230,21 @@ dependency group: <INPUT TYPE=text name=depend1>
                     <OPTION value="test1">test 1
                   </SELECT>(if any of these are filled in, they all must be filled in)<br>
 file: <INPUT TYPE=file name=file1>(required)<BR>
+
+<HR>Build In Constraint Tests</HR>
+email<INPUT TYPE="text" name="email"> (must contain valid email)<BR>
+state<INPUT TYPE="text" name="state"> (must contain valid state)<BR>
+province<INPUT TYPE="text" name="province"> (must contain valid province)<BR>
+state_or_province<INPUT TYPE="text" name="state_or_province"> (must contain valid state_or_province)<BR>
+zip<INPUT TYPE="text" name="zip"> (must contain valid zip)<BR>
+postcode<INPUT TYPE="text" name="postcode"> (must contain valid postcode)<BR>
+zip_or_postcode<INPUT TYPE="text" name="zip_or_postcode"> (must contain valid zip_or_postcode)<BR>
+phone<INPUT TYPE="text" name="phone"> (must contain valid phone)<BR>
+american_phone<INPUT TYPE="text" name="american_phone"> (must contain valid american_phone)<BR>
+cc_number<INPUT TYPE="text" name="cc_number"> (must contain valid cc_number)<BR>
+cc_exp<INPUT TYPE="text" name="cc_exp"> (must contain valid cc_exp)<BR>
+cc_type<INPUT TYPE="text" name="cc_type"> (must contain valid cc_type)<BR>
+ip_address<INPUT TYPE="text" name="ip_address"> (must contain valid ip_address)<BR>
 
 reset: <INPUT TYPE=reset  name=reset1  value=reset><BR>
 submit: <INPUT TYPE=submit name=submit1 value=sub>(required)<BR>
