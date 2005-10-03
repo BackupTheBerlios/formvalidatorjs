@@ -187,7 +187,7 @@ myProfile.msgs.invalid = 'Invalid data';
     </HEAD><BODY><FORM onSubmit="return valid_data(this);">
 
 password<INPUT TYPE=password name=password1 value=""> (required)<BR>
-tinymce textarea<TEXTAREA name="tinymcetext" rows="3"></TEXTAREA>(required, must contain "george") (NOTE: this is supposed to test tinymce support, but tinymce is NOT enabled in this field, so that it may run on systems without tinymce. Edit this page, load tinymce, and enable the flag mce_editable="true" upon this field to enable/test it.)<BR><!---  mce_editable="true" slap this in the text area to make it a tinymce editor (once loading the tinyMCE library that is) -->
+tinymce textarea<TEXTAREA name="tinymcetext" rows="3" mce_editable="true"></TEXTAREA>(required, must contain "george") (NOTE: this will only test the tinymce support if the TinyMCE library is loaded.)<BR>
 
 textarea<TEXTAREA name=textarea1></TEXTAREA>(optional, but required if "text1" is filled in)<BR>
 text 1<INPUT TYPE=text name=text1 value=""> (requird, must contain the text "bob")<BR>
