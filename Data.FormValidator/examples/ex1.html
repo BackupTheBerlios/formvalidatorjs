@@ -132,13 +132,13 @@ myProfile.msgs.invalid = 'Invalid data';
 
     </HEAD><BODY><FORM onSubmit="return valid_data(this);">
 
-password<INPUT TYPE=password name=password1 value=""><BR>
-tinymce textaraa<TEXTAREA name="tinymcetext" rows="3" mce_editable="true"></TEXTAREA><BR>
+password<INPUT TYPE=password name=password1 value=""> (required)<BR>
+tinymce textarea<TEXTAREA name="tinymcetext" rows="3"></TEXTAREA>(required, must contain "george") (NOTE: this is supposed to test tinymce support, but tinymce is NOT enabled in this field, so that it may run on systems without tinymce. Edit this page, load tinymce, and enable the flag mce_editable="true" upon this field to enable/test it.)<BR><!---  mce_editable="true" slap this in the text area to make it a tinymce editor (once loading the tinyMCE library that is) -->
 
 textarea<TEXTAREA name=textarea1></TEXTAREA>(optional, but required if "text1" is filled in)<BR>
-text 1<INPUT TYPE=text name=text1 value=""> (must contain the text "bob")<BR>
-text 1<INPUT TYPE=text name=text1 value=""> (must contain the text "bob")<BR>
-text 2<INPUT TYPE=text name=text2 value=""> (optional)<BR>
+text 1<INPUT TYPE=text name=text1 value=""> (requird, must contain the text "bob")<BR>
+text 1<INPUT TYPE=text name=text1 value=""> (requird, must contain the text "bob")<BR>
+text 2<INPUT TYPE=text name=text2 value=""> (optional, but must contain both "sam" and "mmy" if it is filled in)<BR>
 hidden<INPUT TYPE=hidden name=hidden1 value=""><BR>
 
 select-one<SELECT name=select1>
@@ -146,13 +146,13 @@ select-one<SELECT name=select1>
                  <OPTION value="test1">t e s t 1  asdfasdf
                  <OPTION value="test2">t e s t 2  asdfasdf
                  <OPTION value="balsdf">balsdf asdfasdf
-               </SELECT> (must contain "test")<BR>
+               </SELECT> (required, must contain "test")<BR>
 select-multiple<SELECT name=select2 multiple>
                  <OPTION>testA NO VALUE EXPLICITLY SET
                  <OPTION value="test1">test1 asdfasdf
                  <OPTION value="test2">test2 asdfasdf
                  <OPTION value="balsdf">balsdf asdfasdf
-               </SELECT> (must contain "test")<BR>
+               </SELECT> (required, must contain "test")<BR>
 
 select-one<SELECT name=select3>
                  <OPTION value="">testA VALUE EXPLICITLY SET TO ""
@@ -161,12 +161,12 @@ select-one<SELECT name=select3>
                  <OPTION value="test1">t e s t 1  asdfasdf
                  <OPTION value="test2">t e s t 2  asdfasdf
                  <OPTION value="balsdf">balsdf asdfasdf
-               </SELECT> (must contain "test")<BR>
+               </SELECT> (required, must contain "test")<BR>
 checkbox: asdf<INPUT TYPE=checkbox name=checkbox1 value="asfd">
-          qwer<INPUT TYPE=checkbox name=checkbox1 value="qwer"><BR>
+          qwer<INPUT TYPE=checkbox name=checkbox1 value="qwer">(required)<BR>
 
 radio: 1<INPUT TYPE=radio name=radio1 value="1">
-       2<INPUT TYPE=radio name=radio1 value="2"><BR>
+       2<INPUT TYPE=radio name=radio1 value="2">(required)<BR>
 dependency group: <INPUT TYPE=text name=depend1> 
                   <INPUT TYPE=text name=depend2> 
                   <SELECT name=depend3>
@@ -174,11 +174,11 @@ dependency group: <INPUT TYPE=text name=depend1>
                     <OPTION value="">testb value set to ""
                     <OPTION>testc no value set
                     <OPTION value="test1">test 1
-                  </SELECT><br>
-file: <INPUT TYPE=file name=file1><BR>
+                  </SELECT>(if any of these are filled in, they all must be filled in)<br>
+file: <INPUT TYPE=file name=file1>(required)<BR>
 
 reset: <INPUT TYPE=reset  name=reset1  value=reset><BR>
-submit: <INPUT TYPE=submit name=submit1 value=sub><BR>
+submit: <INPUT TYPE=submit name=submit1 value=sub>(required)<BR>
 
 <INPUT TYPE=hidden name=frmTarget value="testing">
 
