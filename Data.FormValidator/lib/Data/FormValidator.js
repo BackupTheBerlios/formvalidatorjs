@@ -135,7 +135,7 @@ Data.FormValidator = function () {
     this.defaults     = defaults;
 };
 
-Data.FormValidator.VERSION = '0.02';
+Data.FormValidator.VERSION = '0.03';
 
 /*
 
@@ -360,7 +360,19 @@ Data.FormValidator.prototype._check_profile_syntax = function (profile) {
 
 Please see the pod documentation for the perl module L<Data::FormValidator|Data::FormValidator>.
 
-NOTE: This library currently only supports regular expression constraints, and only those specified as strings ("/regexp/", not qr/regexp/).
+NOTE: Constraint support is currently limited. This library currently supports:
+
+=over
+
+=item * Regular Expression Constraints
+
+Only as quoted strings (eg "/regexp/", not qr/regexp/).
+
+=item * Built in Constraints
+
+Those offered by Data::FormValidator (see L<Data.FormValidator.Constraints|Data.FormValidator.Constraints> below), but NOT the extra RegExp::Common ones (thought those are on the TODO list now).
+
+=back
 
 The profile spec for this library, is the result of running a perl C<Data::FormValidator> profile through the module L<Data::JavaScript|Data::JavaScript>. You may construct it by hand, but the specifics of such are outside the scope of this document. Please read on for some more info.
 
@@ -448,11 +460,12 @@ The key is an arbitrary name you create. The values are arrays of field names in
     fieldName2  => { name => 'all_numbers', constraint => '/^\\d+$/' },
     fieldName3  => [ { name => 'no_spaces', constraint => '/^\\S*$/' },
                      { name => 'word_chars', constraint => '/^\\w+$/' } ],
+    fieldName4  => 'valid_email',
  }
 
 The second and third form above are recommended, as they allow you to tie the constraint to a custom error message (through the msgs hash).
 
-We support a very narrow range of constraints options (we do not support constraint_methods as of yet, nor named constraints, nor subroutine references, nor compiled regexps(qr/regexp/) ). The ones listed above will all work.
+We support a very narrow range of constraints options (we do not support constraint_methods as of yet, nor named closures ( "field => email()" ), nor subroutine references, nor compiled regexps(qr/regexp/) ). The ones listed above will all work, namely, quoted regexp and quoted named constraints.
 
 =item msgs
 
@@ -1132,6 +1145,8 @@ This constraints checks if the number is a possible North American style
 of phone number : (XXX) XXX-XXXX. It has to contains 7 or more digits.
 
 =item cc_number
+
+TODO: this is currently implemented, but does not work, because constraint_methods in the profile are not supported. So, because this method relies on knowing the value of two fields, it will not work yet.
 
 This constraint references the value of a credit card type field.
 
@@ -1854,6 +1869,22 @@ Data.FormValidator.Results.prototype.getField = function (frmObj, fieldName) {
 
 
 /*
+
+=head1 DEMO
+
+A live demo is available at the developer site:
+
+L<http://formvalidatorjs.berlios.de/>
+
+=head1 BUGS
+
+L<http://developer.berlios.de/bugs/?group_id=4847>
+
+=head1 CONTRIBUTING
+
+This project is hosted by berlios.de (a sourceforge-ish place). Patches, questions and feedback are welcome.
+
+L<http://developer.berlios.de>
 
 =head1 SEE ALSO
 

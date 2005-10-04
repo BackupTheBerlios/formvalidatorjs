@@ -11,7 +11,7 @@ SYNOPSIS
         var goodColor = "#FFFFFF";
         var badColor  = "#FFFF99";
 
-        var profile = new Object;
+        var profile = new Object();
         // define profile ...
 
         // put any extras you'd like in here
@@ -41,7 +41,7 @@ SYNOPSIS
         var goodColor = "#FFFFFF";
         var badColor  = "#FFFF99";
 
-        var profile = new Object;
+        var profile = new Object();
         // define profile ...
         var results = Data.FormValidator.check(frmObj, profile);
         // clean up colors from form
@@ -192,9 +192,16 @@ INPUT PROFILE SPECIFICATION
     Please see the pod documentation for the perl module
     Data::FormValidator.
 
-    NOTE: This library currently only supports regular expression
-    constraints, and only those specified as strings ("/regexp/", not
-    qr/regexp/).
+    NOTE: Constraint support is currently limited. This library currently
+    supports:
+
+    * Regular Expression Constraints
+        Only as quoted strings (eg "/regexp/", not qr/regexp/).
+
+    * Built in Constraints
+        Those offered by Data::FormValidator (see
+        Data.FormValidator.Constraints below), but NOT the extra
+        RegExp::Common ones (thought those are on the TODO list now).
 
     The profile spec for this library, is the result of running a perl
     "Data::FormValidator" profile through the module Data::JavaScript. You
@@ -283,9 +290,10 @@ INPUT PROFILE SPECIFICATION
     constraints
          constraints => {
             fieldName1  => '/regexp/i',
-            fieldName2  => { name => 'all_numbers', constraint => '/^\d+$/' },
-            fieldName3  => [ { name => 'no_spaces', constraint => '/^\S*$/' },
-                             { name => 'word_chars', constraint => '/^\w+$/' } ],
+            fieldName2  => { name => 'all_numbers', constraint => '/^\\d+$/' },
+            fieldName3  => [ { name => 'no_spaces', constraint => '/^\\S*$/' },
+                             { name => 'word_chars', constraint => '/^\\w+$/' } ],
+            fieldName4  => 'valid_email',
          }
 
         The second and third form above are recommended, as they allow you
@@ -293,9 +301,10 @@ INPUT PROFILE SPECIFICATION
         hash).
 
         We support a very narrow range of constraints options (we do not
-        support constraint_methods as of yet, nor named constraints, nor
-        subroutine references, nor compiled regexps(qr/regexp/) ). The ones
-        listed above will all work.
+        support constraint_methods as of yet, nor named closures ( "field =>
+        email()" ), nor subroutine references, nor compiled
+        regexps(qr/regexp/) ). The ones listed above will all work, namely,
+        quoted regexp and quoted named constraints.
 
     msgs
         This key is used to define parameters related to formatting error
@@ -309,7 +318,7 @@ INPUT PROFILE SPECIFICATION
 
             profile => {
                 constraints => {
-                    fieldName   => { name => 'someName', constraint => '/\d+/' },
+                    fieldName   => { name => 'someName', constraint => '/\\d+/' },
                 },
             };
 
@@ -335,21 +344,21 @@ SYNOPSIS
         var msgs = results.msgs();
 
         // Print the name of missing fields
-        if ( results.has_missing ) {
+        if ( results.has_missing() ) {
             for (f in results.missing) {
                 alert(f + " is missing\n");
             }
         }
 
         // Print the name of invalid fields
-        if ( results.has_invalid ) {
+        if ( results.has_invalid() ) {
             for (f in results.invalid) {
                 alert(f + " is invalid: " + msgs[f] + "\n");
             }
         } 
 
         // Print unknown fields
-        if ( results.has_unknown ) {
+        if ( results.has_unknown() ) {
             for (f in results.unknown) {
                 alert(f + " is unknown\n");
             }
@@ -430,7 +439,7 @@ DATA ACCESSOR STRUCTURES
 
         for (i in results.validate_invalid) {
             var fieldName = results.validate_invalid[i];
-            var failedTests = new Array;
+            var failedTests = new Array();
             for (var j=1; j<results.validate_invalid.length; j++) {
                 failedTests[failedTests.length] = results.validate_invalid[j];
             }
@@ -518,6 +527,112 @@ DATA ACCESSOR STRUCTURES
         for (field in results.unknown) {
             // do something with "field"
         }
+
+NAME
+    Data.FormValidator.Constraints - Basic sets of constraints on input
+    profile.
+
+SYNOPSIS
+        var constraints = new Data.FormValidator.Constraints();
+        if (constraints.supported('email')) {
+            var match;
+            if (match = constraints.email(value)) {
+                // match has untainted data that is valid
+            } else {
+                // failed test
+            }
+        } else {
+            // constraint is not supported
+        }
+
+DESCRIPTION
+    The following built in constraints are provided:
+
+    supported
+        Given a constraint name, returns true if we currently support that,
+        and false otherwise. This is handy, because code calling built in
+        constraints does not have to change as we add new ones, as it will
+        have a bit of introspection to this object.
+
+        NOTE: UGLY HACK: I do not know of any methods like "can" for
+        JavaScript, but that is all that this is really trying to do.
+
+    email
+        Checks if the email LOOKS LIKE an email address. This should be
+        sufficient 99% of the time.
+
+        Look elsewhere if you want something super fancy that matches every
+        possible variation that is valid in the RFC, or runs out and checks
+        some MX records.
+
+    state_or_province
+        This one checks if the input correspond to an american state or a
+        canadian province.
+
+    state
+        This one checks if the input is a valid two letter abbreviation of
+        an american state.
+
+    province
+        This checks if the input is a two letter canadian province
+        abbreviation.
+
+    zip_or_postcode
+        This constraints checks if the input is an american zipcode or a
+        canadian postal code.
+
+    postcode
+        This constraints checks if the input is a valid Canadian postal
+        code.
+
+    zip This input validator checks if the input is a valid american zipcode
+        : 5 digits followed by an optional mailbox number.
+
+    phone
+        This one checks if the input looks like a phone number, (if it
+        contains at least 6 digits.)
+
+    american_phone
+        This constraints checks if the number is a possible North American
+        style of phone number : (XXX) XXX-XXXX. It has to contains 7 or more
+        digits.
+
+    cc_number
+        TODO: this is currently implemented, but does not work, because
+        constraint_methods in the profile are not supported. So, because
+        this method relies on knowing the value of two fields, it will not
+        work yet.
+
+        This constraint references the value of a credit card type field.
+
+         constraint_methods => {
+            cc_no      => cc_number({fields => ['cc_type']}),
+          }
+
+        The number is checked only for plausibility, it checks if the number
+        could be valid for a type of card by checking the checksum and
+        looking at the number of digits and the number of digits of the
+        number.
+
+        This functions is only good at catching typos. IT DOESN'T CHECK IF
+        THERE IS AN ACCOUNT ASSOCIATED WITH THE NUMBER.
+
+    cc_exp
+        This one checks if the input is in the format MM/YY or MM/YYYY and
+        if the MM part is a valid month (1-12) and if that date is not in
+        the past.
+
+    cc_type
+        This one checks if the input field starts by M(asterCard), V(isa),
+        A(merican express) or D(iscovery).
+
+    ip_address
+        This checks if the input is formatted like an IP address (v4)
+
+REGEXP::COMMON SUPPORT
+    (TODO) this is not yet supported. It will require a port of
+    RegExp::Common over to JavaScript, whish should actually be fairly
+    trivial.
 
 UTILITY METHODS
   results.msgs()
