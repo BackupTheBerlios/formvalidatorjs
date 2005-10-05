@@ -744,7 +744,24 @@ INTERNAL METHODS
         dispatching function - snags the data for the requested field (all
         instances of such named field). NOTE: this always returns an array
 
+DEMO
+    A live demo is available at the developer site:
+
+    <http://formvalidatorjs.berlios.de/>
+
+BUGS
+    <http://developer.berlios.de/bugs/?group_id=4847>
+
+CONTRIBUTING
+    This project is hosted by berlios.de (a sourceforge-ish place). Patches,
+    questions and feedback are welcome.
+
+    <http://developer.berlios.de>
+
 SEE ALSO
+    JSAN listing
+    <http://www.openjsan.org/doc/u/un/unrtst/Data/FormValidator/>
+
     Data::FormValidator, Data::FormValidator::Results,
     Data::FormValidator::Constraints,
     Data::FormValidator::ConstraintsFactory, Data::FormValidator::Filters

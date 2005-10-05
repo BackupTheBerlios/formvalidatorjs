@@ -1888,7 +1888,7 @@ L<http://developer.berlios.de>
 
 =head1 SEE ALSO
 
-JSAN listing L<http://www.openjsan.org/doc/u/un/unrtst/Data/FormValidator/0.03/index.html>
+JSAN listing L<http://www.openjsan.org/doc/u/un/unrtst/Data/FormValidator/>
 
 L<Data::FormValidator>, L<Data::FormValidator::Results>,
 L<Data::FormValidator::Constraints>, L<Data::FormValidator::ConstraintsFactory>,
