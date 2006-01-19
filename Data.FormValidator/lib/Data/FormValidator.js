@@ -38,7 +38,7 @@ Data.FormValidator - Validate HTML form input based on input profile.
             return false;
         }
     }
- }
+ };
  // --></SCRIPT>
 
 ALTERNATIVELY: the following is a more detailed handling, and is actually what happens in when the above convenience method, C<check_and_report()>, is called.
@@ -135,7 +135,7 @@ Data.FormValidator = function () {
     this.defaults     = defaults;
 };
 
-Data.FormValidator.VERSION = '0.03';
+Data.FormValidator.VERSION = '0.04';
 
 /*
 
@@ -624,7 +624,7 @@ Data.FormValidator.Results.prototype.has_invalid = function () {
         count++;
     }
     return count;
-}
+};
 
 Data.FormValidator.Results.prototype.has_unknown = function () {
     var count = 0;
@@ -632,7 +632,7 @@ Data.FormValidator.Results.prototype.has_unknown = function () {
         count++;
     }
     return count;
-}
+};
 
 Data.FormValidator.Results.prototype.has_missing_required = function () {
     var count = 0;
@@ -640,7 +640,7 @@ Data.FormValidator.Results.prototype.has_missing_required = function () {
         count++;
     }
     return count;
-}
+};
 
 Data.FormValidator.Results.prototype.has_missing_dependency = function () {
     var count = 0;
@@ -648,7 +648,7 @@ Data.FormValidator.Results.prototype.has_missing_dependency = function () {
         count++;
     }
     return count;
-}
+};
 
 Data.FormValidator.Results.prototype.has_missing_depgroup = function () {
     var count = 0;
@@ -656,7 +656,7 @@ Data.FormValidator.Results.prototype.has_missing_depgroup = function () {
         count++;
     }
     return count;
-}
+};
 
 /*
 
@@ -1462,7 +1462,7 @@ Data.FormValidator.Results.prototype.msgs = function (controls) {
     }
 
     return msgs;
-}
+};
 
 /*
 
