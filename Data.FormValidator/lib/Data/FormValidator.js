@@ -135,7 +135,7 @@ Data.FormValidator = function () {
     this.defaults     = defaults;
 };
 
-Data.FormValidator.VERSION = '0.04';
+Data.FormValidator.VERSION = '0.05';
 
 /*
 
@@ -986,7 +986,7 @@ Data.FormValidator.Results.prototype._process = function (profile, frmObj) {
                     var failedTest = false;
                     // Test for RegExp style check
                     var re_parts;
-                    if (re_parts = this.regexp_test(c.constraint)) {
+                    if (re_parts = this.regexp_test.exec(c.constraint)) {
                         var constraint = new RegExp(re_parts[1], re_parts[2]);
                         var fieldValues = this.getField(frmObj, fieldName);
                         /* NOTE: every value must pass (not one pass and all pass */
