@@ -135,7 +135,7 @@ Data.FormValidator = function () {
     this.defaults     = defaults;
 };
 
-Data.FormValidator.VERSION = '0.05';
+Data.FormValidator.VERSION = '0.06';
 
 /*
 
@@ -1735,7 +1735,7 @@ Data.FormValidator.Results.prototype.hasRadioOrCheckbox = function (thisObj) {
 Data.FormValidator.Results.prototype.hasMCEText = function (mceObj) {
     var allData = new Array();
     /* If tinyMCE is loaded (we guess based on the namespace)   *
-     * then we use calls from teh TinyMCE library.              *
+     * then we use calls from the TinyMCE library.              *
      * Otherwise, we treat this like a normal text field, and   *
      * hope for the best.                                       */
     var fieldName = mceObj.name;
@@ -1743,7 +1743,14 @@ Data.FormValidator.Results.prototype.hasMCEText = function (mceObj) {
         var txtData = this.hasText(mceObj);
         if (txtData) allData = txtData;
     } else {
-        tinyMCE.execInstanceCommand(fieldName, 'mceFocus');
+        /* tinymce-1.x requires a focus prior to grabbing the text. *
+         * In tinymce-2.x, the focus overrides "submit", which will *
+         * break your form, so we should NOT use it there.          */
+        if ( (typeof tinyMCE.majorVersion == "undefined") ||
+             (typeof tinyMCE.majorVersion != "undefined" && tinyMCE.majorVersion < 2) ) {     
+            // running 1.x tinymce code
+            tinyMCE.execInstanceCommand(fieldName, 'mceFocus');
+        }
         allData[allData.length] = tinyMCE.getContent();
     }
     return (allData.length > 0) ? allData : false;
