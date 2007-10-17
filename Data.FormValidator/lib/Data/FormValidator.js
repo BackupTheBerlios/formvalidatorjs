@@ -1747,11 +1747,11 @@ Data.FormValidator.Results.prototype.hasMCEText = function (mceObj) {
          * In tinymce-2.x, the focus overrides "submit", which will *
          * break your form, so we should NOT use it there.          */
         if ( (typeof tinyMCE.majorVersion == "undefined") ||
-             (typeof tinyMCE.majorVersion != "undefined" && tinyMCE.majorVersion < 2) ) {     
+             (typeof tinyMCE.majorVersion != "undefined" && tinyMCE.majorVersion < 2) ) {
             // running 1.x tinymce code
             tinyMCE.execInstanceCommand(fieldName, 'mceFocus');
         }
-        allData[allData.length] = tinyMCE.getContent();
+        allData[allData.length] = tinyMCE.getContent(tinyMCE.getEditorId(fieldName));
     }
     return (allData.length > 0) ? allData : false;
 };
