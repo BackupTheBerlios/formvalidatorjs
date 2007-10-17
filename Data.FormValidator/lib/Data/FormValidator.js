@@ -135,7 +135,7 @@ Data.FormValidator = function () {
     this.defaults     = defaults;
 };
 
-Data.FormValidator.VERSION = '0.06';
+Data.FormValidator.VERSION = '0.07';
 
 /*
 
