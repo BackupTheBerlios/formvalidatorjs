@@ -385,9 +385,9 @@ Here is a very simple input profile in perl:
         required => [qw( fullname age phone email address )],
         constraints => {
             email => { name => "valid_email",
-                       constraint => "/^(([a-z0-9_\\.\\+\\-\\=\\?\\^\\#]){1,64}\\@(([a-z0-9\\-]){1,251}\\.){1,252}[a-z0-9]{2,4})$/i" },
+                       constraint => "/^(([a-z0-9_\\.\\+\\-\\=\\?\\^\\#]){1,64}\\@(([a-z0-9\\-]){1,251}\\.){1,252}[a-z0-9]{2,4})\$/i" },
             age => { name => "valid_age",
-                     constraint => "/^1?\d?\d$/" },
+                     constraint => "/^1?\\d?\\d\$/" },
         },
         msgs => {
             constraints => {
