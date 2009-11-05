@@ -135,7 +135,7 @@ Data.FormValidator = function () {
     this.defaults     = defaults;
 };
 
-Data.FormValidator.VERSION = '0.07';
+Data.FormValidator.VERSION = '0.08';
 
 /*
 
@@ -855,8 +855,7 @@ Data.FormValidator.Results.prototype._process = function (profile, frmObj) {
     this.missing_depgroup   = new Object();
 
     // pre-compile the acceptable regexp test
-    this.regexp_test = new RegExp();
-    this.regexp_test.compile('^/(.*)/(g|i|gi|ig)?$');
+    this.regexp_test = new RegExp('^/(.*)/(g|i|gi|ig)?$');
 
     // Build lookup of required and optional fields
     this.required = new Object();
