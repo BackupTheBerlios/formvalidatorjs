@@ -135,7 +135,7 @@ Data.FormValidator = function () {
     this.defaults     = defaults;
 };
 
-Data.FormValidator.VERSION = '0.08';
+Data.FormValidator.VERSION = '0.09';
 
 /*
 
@@ -1492,7 +1492,9 @@ Data.FormValidator.Results.prototype.changeStyle = function (frmObj, fieldName, 
 
     for (var i=0; i<fieldList.length; i++) {
         var type = this.fieldType(fieldList[i]);
-        if (type == "radio") {
+        if (type === false) {
+            // catch xhtml1.0 <fieldset> (or similar) that have no type
+        } else if (type == "radio") {
             // radio buttons don't support the .style method
         } else if (type == "button" || type == "reset" || type == "submit") {
             // we could change these, but we don't, cause it looks bad
@@ -1538,20 +1540,23 @@ Data.FormValidator.Results.prototype.cleanForm = function (frmObj, goodColor) {
     var el,e = 0;
     while (el = frmObj.elements[e++]) {
         var type = this.fieldType(el);
-        // radio buttons don't support the .style method
-        // we could change these others, but we don't, cause it looks bad
-        if (type != "radio" && type != "button" && 
-            type != "reset" && type != "submit"    ) {
-            if (el.length) { // for select-*
-                /* select objects need the outter node, and each individual node changed */
-                if ( type.substr(0,6) == "select" ) {
+        // type may be undefined in xhtml1.0 <fieldset> tags, and we have to skip them.
+        if (! type === false) {
+            // radio buttons don't support the .style method
+            // we could change these others, but we don't, cause it looks bad
+            if (type != "radio" && type != "button" && 
+                type != "reset" && type != "submit"    ) {
+                if (el.length) { // for select-*
+                    /* select objects need the outter node, and each individual node changed */
+                    if ( type.substr(0,6) == "select" ) {
+                        el.style.background = goodColor;
+                    }
+                    for (var i=0; i<el.length; i++) {
+                        el[i].style.background = goodColor;
+                    }
+                } else {
                     el.style.background = goodColor;
                 }
-                for (var i=0; i<el.length; i++) {
-                    el[i].style.background = goodColor;
-                }
-            } else {
-                el.style.background = goodColor;
             }
         }
     }
@@ -1620,7 +1625,7 @@ step through a string, and see if it's nothing but blank
 
 =item B<fieldType(Obj)>
 
-method to determine type of form field. We use this, cause we support meta types like tinymce.
+method to determine type of form field. We use this, cause we support meta types like tinymce. This will also return false on field items that have no type (ex. xhtml1.0 <fieldset>).
 
 NOTE: MUST pass in a single form element, not some jacked up frmObj['field'] thing.
 
@@ -1788,6 +1793,12 @@ Data.FormValidator.Results.prototype.fieldType = function (Obj) {
     if (! this.isValidObject(Obj)) {
         return false;
     }
+
+    // catch xhtml1.0 <fieldset> (or similar) that have no type
+    if (! Obj.type) {
+        return false;
+    }
+
     var type = Obj.type.toString();
     /* test to see if the element is a TinyMCE element */
     if (type.substr(0,4) == "text") {
@@ -1833,6 +1844,11 @@ Data.FormValidator.Results.prototype.getField = function (frmObj, fieldName) {
     var el,e = 0;
     while (el = elList[e++]) {
         var type = this.fieldType(el);
+
+        // catch xhtml1.0 <fieldset> (or similar) that have no type
+        if (type === false) {
+            continue;
+        }
 
         var dataList;
         if ( (type.substr(0,4) == "text")   || 
