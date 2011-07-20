@@ -135,7 +135,7 @@ Data.FormValidator = function () {
     this.defaults     = defaults;
 };
 
-Data.FormValidator.VERSION = '0.09';
+Data.FormValidator.VERSION = '0.10';
 
 /*
 
@@ -1544,8 +1544,10 @@ Data.FormValidator.Results.prototype.cleanForm = function (frmObj, goodColor) {
         if (! type === false) {
             // radio buttons don't support the .style method
             // we could change these others, but we don't, cause it looks bad
+            // Firefox 5 returns type of "fieldset" for <fieldset> tags, and we don't want to do those either.
             if (type != "radio" && type != "button" && 
-                type != "reset" && type != "submit"    ) {
+                type != "reset" && type != "submit" && 
+                type != "fieldset" ) {
                 if (el.length) { // for select-*
                     /* select objects need the outter node, and each individual node changed */
                     if ( type.substr(0,6) == "select" ) {
@@ -1795,6 +1797,7 @@ Data.FormValidator.Results.prototype.fieldType = function (Obj) {
     }
 
     // catch xhtml1.0 <fieldset> (or similar) that have no type
+    // NOTE: some browsers do return 'fieldset' for the type. We return it if they do.
     if (! Obj.type) {
         return false;
     }

@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: Data.FormValidator
-version: 0.09
+version: 0.10
 author:
   - Joshua I. Miller <unrtst@cpan.org>
 abstract: Validate HTML form input based on input profiles.
